@@ -38,17 +38,17 @@ class ProductProduct(models.Model):
         string='Product Alert Tag', compute='_compute_alert_tag',
         help='This field represents the alert tag of the product.')
 
-    @api.depends('qty_available')
+    @api.depends('qty_available','categ_id')
     def _compute_alert_tag(self):
         """Computes the value of the 'alert_tag' field based on the product's
         stock quantity and configured low stock alert parameters."""
-        stock_alert = self.env['ir.config_parameter'].sudo().get_param(
-            'low_stocks_product_alert.is_low_stock_alert')
+        
+        
         for rec in self:
+            stock_alert = rec.categ_id.is_low_stock_alert if rec.categ_id else False
             if stock_alert:
                 is_low_stock = True if rec.detailed_type == 'product' and rec.qty_available <= int(
-                    self.env['ir.config_parameter'].sudo().get_param(
-                        'low_stocks_product_alert.min_low_stock_alert')) else False
+                    self.categ_id.min_low_stock_alert) else False
                 rec.alert_tag = rec.qty_available if is_low_stock else False
             else:
                 rec.alert_tag = False

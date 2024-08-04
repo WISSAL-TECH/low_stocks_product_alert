@@ -44,19 +44,17 @@ class ProductTemplate(models.Model):
                               help='This field represents the background '
                                    'color of the product.')
 
-    @api.depends('qty_available')
+    @api.depends('qty_available','categ_id')
     def _compute_alert_state(self):
         """ Computes the 'alert_state' and 'color_field' fields based on
         the product's stock quantity and low stock alert parameters."""
-        stock_alert = self.env['ir.config_parameter'].sudo().get_param(
-            'low_stocks_product_alert.is_low_stock_alert')
+
         for rec in self:
+            stock_alert = rec.categ_id.is_low_stock_alert if rec.categ_id else False
             if stock_alert:
                 rec.alert_state, rec.color_field = (False, 'white') if \
                     rec.detailed_type != 'product' or rec.qty_available > int(
-                        rec.env['ir.config_parameter'].sudo().get_param(
-                            'low_stocks_product_alert.min_low_stock_alert')) \
-                    else (True, '#fdc6c673')
+                        rec.categ_id.min_low_stock_alert) else (True, '#fdc6c673')
             else:
                 rec.alert_state = False
                 rec.color_field = 'white'

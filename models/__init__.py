@@ -19,7 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from . import product_category
 from . import product_product
 from . import product_template
 from . import pos_session
-from . import res_config_settings
+# from . import res_config_settings
